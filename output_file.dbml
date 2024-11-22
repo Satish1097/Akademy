@@ -1,0 +1,361 @@
+Project "None" {
+  database_type: 'MySQL'
+  Note: '''None
+  Last Updated At 11-21-2024 09:53AM UTC'''
+}
+
+enum authapp.char_event_mode {
+  "Online" [note: '''Online''']
+  "Offline" [note: '''Offline''']
+}
+
+enum authapp.char_notification_type {
+  "Event Update" [note: '''Event Update''']
+  "Organizer Message" [note: '''Organizer Message''']
+}
+
+enum authapp.char_user_role {
+  "admin" [note: '''Admin''']
+  "organizer" [note: '''Organizer''']
+  "user" [note: '''User''']
+}
+
+Table authapp.BankAccount {
+  Note: '''
+BankAccount(id, organizer, account_number, bank_name, ifsc_code)
+
+*DB table: authapp_bankaccount*'''
+
+  id big_auto [pk, unique, not null]
+  organizer_id one_to_one [unique, not null]
+  account_number char [not null]
+  bank_name char [not null]
+  ifsc_code char [not null]
+
+  indexes {
+    (organizer_id) [unique, name: 'authapp_bankaccount_organizer_id_key', type: btree]
+    (id) [pk, unique, name: 'authapp_bankaccount_pkey', type: btree]
+  }
+}
+ref: authapp.BankAccount.organizer_id - authapp.Organizer.id
+
+
+Table authapp.Certificate {
+  Note: '''
+Certificate(id, user, file, event, uploaded_at, issued_at)
+
+*DB table: authapp_certificate*'''
+
+  id big_auto [pk, unique, not null]
+  user_id foreign_key [not null]
+  file file [not null]
+  event_id foreign_key [null]
+  uploaded_at date_time [not null]
+  issued_at date [null]
+
+  indexes {
+    (event_id) [name: 'authapp_certificate_event_id_d4e09e6b', type: btree]
+    (id) [pk, unique, name: 'authapp_certificate_pkey', type: btree]
+    (user_id) [name: 'authapp_certificate_user_id_f1dd2591', type: btree]
+  }
+}
+ref: authapp.Certificate.user_id > authapp.User.id
+ref: authapp.Certificate.event_id > authapp.Event.id
+
+
+Table authapp.CertificateIssue {
+  Note: '''
+CertificateIssue(id, certificate, user, issue_description, resolved, created_at)
+
+*DB table: authapp_certificateissue*'''
+
+  id big_auto [pk, unique, not null]
+  certificate_id foreign_key [not null]
+  user_id foreign_key [not null]
+  issue_description text [not null]
+  resolved boolean [default:`False`, not null]
+  created_at date_time [not null]
+
+  indexes {
+    (certificate_id) [name: 'authapp_certificateissue_certificate_id_aa2536c8', type: btree]
+    (id) [pk, unique, name: 'authapp_certificateissue_pkey', type: btree]
+    (user_id) [name: 'authapp_certificateissue_user_id_2951c049', type: btree]
+  }
+}
+ref: authapp.CertificateIssue.certificate_id > authapp.Certificate.id
+ref: authapp.CertificateIssue.user_id > authapp.User.id
+
+
+Table authapp.Event {
+  Note: '''
+Event(id, title, banner, description, speaker, price, mode, venue, capacity, schedule, organizer)
+
+*DB table: authapp_event*'''
+
+  id big_auto [pk, unique, not null]
+  title char [not null]
+  banner image [not null]
+  description text [not null]
+  speaker char [not null]
+  price decimal [not null]
+  mode authapp.char_event_mode [not null]
+  venue char [null]
+  capacity positive_integer [not null]
+  schedule date_time [not null]
+  organizer_id foreign_key [not null]
+
+  indexes {
+    (organizer_id) [name: 'authapp_event_organizer_id_020e103a', type: btree]
+    (id) [pk, unique, name: 'authapp_event_pkey', type: btree]
+  }
+}
+ref: authapp.Event.organizer_id > authapp.User.id
+
+
+Table authapp.EventCategory {
+  Note: '''
+EventCategory(id, name)
+
+*DB table: authapp_eventcategory*'''
+
+  id big_auto [pk, unique, not null]
+  name char [not null]
+
+  indexes {
+    (id) [pk, unique, name: 'authapp_eventcategory_pkey', type: btree]
+  }
+}
+
+
+Table authapp.Notification {
+  Note: '''
+Notification(id, user, type, message, created_at, is_read)
+
+*DB table: authapp_notification*'''
+
+  id big_auto [pk, unique, not null]
+  user_id foreign_key [not null]
+  type authapp.char_notification_type [not null]
+  message text [not null]
+  created_at date_time [not null]
+  is_read boolean [default:`False`, not null]
+
+  indexes {
+    (id) [pk, unique, name: 'authapp_notification_pkey', type: btree]
+    (user_id) [name: 'authapp_notification_user_id_a4142a13', type: btree]
+  }
+}
+ref: authapp.Notification.user_id > authapp.User.id
+
+
+Table authapp.OTP {
+  Note: '''
+OTP(id, mobile, email, secret_key, generated_at, is_used)
+
+*DB table: authapp_otp*'''
+
+  id big_auto [pk, unique, not null]
+  mobile char [not null]
+  email email [not null]
+  secret_key char [not null]
+  generated_at date_time [not null]
+  is_used boolean [default:`False`, not null]
+
+  indexes {
+    (id) [pk, unique, name: 'authapp_otp_pkey', type: btree]
+  }
+}
+
+
+Table authapp.Organizer {
+  Note: '''
+Organizer(id, user, company_name, logo, address, breaf_desc_of_company)
+
+*DB table: authapp_organizer*'''
+
+  id big_auto [pk, unique, not null]
+  user_id one_to_one [unique, not null]
+  company_name char [not null]
+  logo image [null]
+  address text [not null]
+  breaf_desc_of_company text [not null]
+
+  indexes {
+    (id) [pk, unique, name: 'authapp_organizer_pkey', type: btree]
+    (user_id) [unique, name: 'authapp_organizer_user_id_key', type: btree]
+  }
+}
+ref: authapp.Organizer.user_id - authapp.User.id
+
+
+Table authapp.Profile {
+  Note: '''
+Profile(id, user, medical_score)
+
+*DB table: authapp_profile*'''
+
+  id big_auto [pk, unique, not null]
+  user_id one_to_one [unique, not null]
+  medical_score integer [default:`0`, not null]
+
+  indexes {
+    (id) [pk, unique, name: 'authapp_profile_pkey', type: btree]
+    (user_id) [unique, name: 'authapp_profile_user_id_key', type: btree]
+  }
+}
+ref: authapp.Profile.user_id - authapp.User.id
+
+
+Table authapp.Registration {
+  Note: '''
+Registration(id, user, event, registered_at, amount_paid, payment_method, is_confirmed, refund_initiated)
+
+*DB table: authapp_registration*'''
+
+  id big_auto [pk, unique, not null]
+  user_id foreign_key [not null]
+  event_id foreign_key [not null]
+  registered_at date_time [not null]
+  amount_paid decimal [not null]
+  payment_method char [not null]
+  is_confirmed boolean [default:`False`, not null]
+  refund_initiated boolean [default:`False`, not null]
+
+  indexes {
+    (event_id) [name: 'authapp_registration_event_id_37c1cf13', type: btree]
+    (id) [pk, unique, name: 'authapp_registration_pkey', type: btree]
+    (user_id) [name: 'authapp_registration_user_id_ce7d9105', type: btree]
+  }
+}
+ref: authapp.Registration.user_id > authapp.User.id
+ref: authapp.Registration.event_id > authapp.Event.id
+
+
+Table authapp.SavedEvent {
+  Note: '''
+SavedEvent(id, user, event)
+
+*DB table: authapp_savedevent*'''
+
+  id big_auto [pk, unique, not null]
+  user_id foreign_key [not null]
+  event_id foreign_key [not null]
+
+  indexes {
+    (event_id) [name: 'authapp_savedevent_event_id_a781a1de', type: btree]
+    (id) [pk, unique, name: 'authapp_savedevent_pkey', type: btree]
+    (user_id) [name: 'authapp_savedevent_user_id_da75df43', type: btree]
+    (user_id,event_id) [unique, name: 'authapp_savedevent_user_id_event_id_6744e64f_uniq', type: btree]
+  }
+}
+ref: authapp.SavedEvent.user_id > authapp.User.id
+ref: authapp.SavedEvent.event_id > authapp.Event.id
+
+
+Table authapp.User {
+  Note: '''
+User(id, password, last_login, is_superuser, email, username, mobile, is_active, is_staff, role, date_joined, is_mobile_verified, is_email_verified)
+
+*DB table: authapp_user*'''
+
+  id big_auto [pk, unique, not null]
+  password char [not null]
+  last_login date_time [null]
+  is_superuser boolean [note: '''Designates that this user has all permissions without explicitly assigning them.''', default:`False`, not null]
+  email email [unique, not null]
+  username char [not null]
+  mobile char [null]
+  is_active boolean [default:`True`, not null]
+  is_staff boolean [default:`False`, not null]
+  role authapp.char_user_role [default:`"user"`, not null]
+  date_joined date_time [default:`django.utils.timezone.now()`, not null]
+  is_mobile_verified boolean [default:`False`, not null]
+  is_email_verified boolean [default:`False`, not null]
+
+  indexes {
+    (email) [unique, name: 'authapp_user_email_key', type: btree]
+    (id) [pk, unique, name: 'authapp_user_pkey', type: btree]
+  }
+}
+
+
+Table authapp.UserToken {
+  Note: '''
+UserToken(id, refresh_token, access_token)
+
+*DB table: authapp_usertoken*'''
+
+  id big_auto [pk, unique, not null]
+  refresh_token char [unique, not null]
+  access_token char [unique, not null]
+
+  indexes {
+    (access_token) [unique, name: 'authapp_usertoken_access_token_key', type: btree]
+    (id) [pk, unique, name: 'authapp_usertoken_pkey', type: btree]
+    (refresh_token) [unique, name: 'authapp_usertoken_refresh_token_key', type: btree]
+  }
+}
+
+
+Table authapp.event_categories {
+  Note: '''
+This is a Many-To-Many linking table autogenerated by Django.
+
+*DB table: authapp_event_categories*'''
+
+  id auto [pk, not null]
+  eventcategory_id auto
+  event_id auto
+
+  indexes {
+    (event_id) [name: 'authapp_event_categories_event_id_7b1b83d3', type: btree]
+    (event_id,eventcategory_id) [unique, name: 'authapp_event_categories_event_id_eventcategory_id_5019741b_uniq', type: btree]
+    (eventcategory_id) [name: 'authapp_event_categories_eventcategory_id_95b407b9', type: btree]
+    (id) [pk, unique, name: 'authapp_event_categories_pkey', type: btree]
+  }
+}
+ref: authapp.Event.id > authapp.event_categories.event_id
+ref: authapp.EventCategory.id > authapp.event_categories.eventcategory_id
+
+
+Table authapp.user_groups {
+  Note: '''
+This is a Many-To-Many linking table autogenerated by Django.
+
+*DB table: authapp_user_groups*'''
+
+  id auto [pk, not null]
+  group_id auto
+  user_id auto
+
+  indexes {
+    (group_id) [name: 'authapp_user_groups_group_id_361087d7', type: btree]
+    (id) [pk, unique, name: 'authapp_user_groups_pkey', type: btree]
+    (user_id) [name: 'authapp_user_groups_user_id_aad8a001', type: btree]
+    (user_id,group_id) [unique, name: 'authapp_user_groups_user_id_group_id_532435ff_uniq', type: btree]
+  }
+}
+ref: authapp.User.id > authapp.user_groups.user_id
+ref: auth.Group.id > authapp.user_groups.group_id
+
+
+Table authapp.user_user_permissions {
+  Note: '''
+This is a Many-To-Many linking table autogenerated by Django.
+
+*DB table: authapp_user_user_permissions*'''
+
+  id auto [pk, not null]
+  permission_id auto
+  user_id auto
+
+  indexes {
+    (user_id,permission_id) [unique, name: 'authapp_user_user_permis_user_id_permission_id_d73ed934_uniq', type: btree]
+    (permission_id) [name: 'authapp_user_user_permissions_permission_id_ea3ff82e', type: btree]
+    (id) [pk, unique, name: 'authapp_user_user_permissions_pkey', type: btree]
+    (user_id) [name: 'authapp_user_user_permissions_user_id_fb111ce4', type: btree]
+  }
+}
+ref: authapp.User.id > authapp.user_user_permissions.user_id
+ref: auth.Permission.id > authapp.user_user_permissions.permission_id
+
