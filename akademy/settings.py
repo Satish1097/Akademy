@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "authapp",
+    "notification",
+    "events",
+    "payments",
     "rest_framework",
     "rest_framework.authtoken",
     "dj_rest_auth",
@@ -53,6 +56,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.apple",  # Apple provider
     "django_extensions",
     "django_dbml",
+    "notifications",
 ]
 
 MIDDLEWARE = [
@@ -66,7 +70,7 @@ MIDDLEWARE = [
     # "authapp.middleware.TokenBlacklistMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django.middleware.locale.LocaleMiddleware",
-    "authapp.middleware.LanguagePreferenceMiddleware",
+    # "authapp.middleware.LanguagePreferenceMiddleware",
 ]
 
 ROOT_URLCONF = "akademy.urls"

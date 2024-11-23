@@ -63,37 +63,36 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
-class EventCategorySerializer(serializers.ModelSerializer):
+class OrganizerSerializer(serializers.ModelSerializer):
+    user = UserRegistrationSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), write_only=True
+    )
+
     class Meta:
-        model = EventCategory
-        fields = "__all__"
+        model = Organizer
+        fields = [
+            "user",
+            "user_id",
+            "company_name",
+            "logo",
+            "address",
+            "breaf_desc_of_company",
+        ]
 
 
-class EventSerializer(serializers.ModelSerializer):
+class BankSerializer(serializers.ModelSerializer):
+    organizer_id = serializers.PrimaryKeyRelatedField(
+        queryset=Organizer.objects.all(), write_only=True
+    )
+    organizer = OrganizerSerializer(read_only=True)
+
     class Meta:
-        model = Event
-        fields = "__all__"
-
-    def validate_schedule(self, sheduled_date):
-        if sheduled_date <= datetime.now():
-            raise ValidationError("The event schedule must be in the future.")
-        return sheduled_date
-
-
-class SavedEventSerializer(serializers.ModelSerializer):
-    class Meta:
-        models = SavedEvent
-        fields = ["user", "event"]
-
-    def validate(self, data):
-        user = data["user"]
-        event = data["event"]
-        if SavedEvent.objects.filter(user=user, event=event).exists():
-            raise ValidationError("You have already saved this event.")
-        return data
-
-
-class CertificateIssueSerializer(serializers.ModelSerializer):
-    class Meta:
-        models = CertificateIssue
-        fields = ["certificate", "user", "issue_description", "resolved", "created_at"]
+        model = BankAccount
+        fields = [
+            "organizer",
+            "organizer_id",
+            "account_number",
+            "bank_name",
+            "ifsc_code",
+        ]

@@ -1,6 +1,8 @@
 from django.contrib import admin
 from authapp.models import *
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from events.models import *
+from notifications.models import *
 
 
 class UserAdmin(BaseUserAdmin):
@@ -59,11 +61,3 @@ admin.site.register(OTP)
 admin.site.register(UserToken)
 admin.site.register(Organizer)
 admin.site.register(BankAccount)
-admin.site.register(EventCategory)
-admin.site.register(Event)
-admin.site.register(SavedEvent)
-admin.site.register(Profile)
-admin.site.register(Certificate)
-admin.site.register(Registration)
-admin.site.register(Notification)
-admin.site.register(CertificateIssue)

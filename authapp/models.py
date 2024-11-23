@@ -94,129 +94,13 @@ class BankAccount(models.Model):
         return f"{self.organizer.user.username} - {self.account_number}"
 
 
-class EventCategory(models.Model):
-    name = models.CharField(max_length=255)
+# class Profile(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+#     medical_score = models.IntegerField(default=0)
+#     language_choice = [("en", "English"), ("ar", "Arabic")]
+#     prefered_language = models.CharField(
+#         max_length=10, choices=language_choice, default="en"
+#     )
 
-    def __str__(self):
-        return self.name
-
-
-class Event(models.Model):
-    title = models.CharField(max_length=255)
-    banner = models.ImageField(upload_to="images/event_banners/")
-    description = models.TextField()
-    speaker = models.TextField(max_length=255)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    mode = models.CharField(
-        max_length=50, choices=[("Online", "Online"), ("Offline", "Offline")]
-    )
-    venue = models.CharField(max_length=255, null=True, blank=True)
-    capacity = models.PositiveIntegerField()
-    schedule = models.DateTimeField()
-    organizer = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="organized_events"
-    )
-    categories = models.ManyToManyField(EventCategory, related_name="events")
-
-    STATUS_CHOICES = [
-        ("draft", "Draft"),
-        ("pending_approval", "Pending Approval"),
-        ("published", "Published"),
-        ("completed", "Completed"),
-        ("cancelled", "Cancelled"),
-        ("postponed", "Postponed"),
-    ]
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="draft",
-    )
-
-    def __str__(self):
-        return self.title
-
-
-class SavedEvent(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="saved_events"
-    )
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="saved_by")
-
-    class Meta:
-        unique_together = ("user", "event")
-
-
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    medical_score = models.IntegerField(default=0)
-    language_choice = [("en", "English"), ("ar", "Arabic")]
-    prefered_language = models.CharField(
-        max_length=10, choices=language_choice, default="en"
-    )
-
-    def __str__(self):
-        return f"{self.user.email}'s Profile"
-
-
-class Certificate(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="certificates"
-    )
-    file = models.FileField(upload_to="certificates/")
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-    issued_at = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"Certificate for {self.user.email}"
-
-
-class Registration(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="registrations"
-    )
-    event = models.ForeignKey(
-        Event, on_delete=models.CASCADE, related_name="registrations"
-    )
-    registered_at = models.DateTimeField(auto_now_add=True)
-    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.CharField(max_length=50)
-    is_confirmed = models.BooleanField(default=False)
-    refund_initiated = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.user.email} - {self.event.title}"
-
-
-class Notification(models.Model):
-    NOTIFICATION_TYPES = [
-        ("Event Update", "Event Update"),
-        ("Organizer Message", "Organizer Message"),
-    ]
-
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="notifications"
-    )
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
-    message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Notification for {self.user.email}"
-
-
-class CertificateIssue(models.Model):
-    certificate = models.ForeignKey(
-        Certificate, on_delete=models.CASCADE, related_name="issues"
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="certificate_issues"
-    )
-    issue_description = models.TextField()
-    resolved = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Issue for {self.certificate} by {self.user.email}"
+#     def __str__(self):
+#         return f"{self.user.email}'s Profile"
